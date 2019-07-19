@@ -28,7 +28,9 @@ fn main() {
 
 
     let clients = Client::new();
-    let mut resp = clients.get("https://api.github.com/users/codertocat").send().unwrap();
+    let mut resp = clients.get("https://api.github.com/users/codertocat")
+                        .header("Authorization", format!("token {token}", token = rc))
+                        .send().unwrap();
     for (key, value) in resp.headers().iter() {
         println!("{:?}: {:?}", key, value);
     }
