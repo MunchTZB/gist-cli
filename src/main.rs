@@ -1,6 +1,7 @@
 extern crate clap;
 extern crate reqwest;
 extern crate dirs;
+extern crate serde_json;
 use clap::{Arg, App};
 use std::collections::HashMap;
 use reqwest::Client;
@@ -28,12 +29,12 @@ fn main() {
 
 
     let clients = Client::new();
-    let mut resp = clients.get("https://api.github.com/users/codertocat")
+    let resp: serde_json::Value = clients.get("https://api.github.com/user")
                         .header("Authorization", format!("token {token}", token = rc))
-                        .send().unwrap();
-    for (key, value) in resp.headers().iter() {
-        println!("{:?}: {:?}", key, value);
-    }
-
-    println!("{:#?}", resp);
+                        .send().unwrap().json().unwrap();
+    let gist_url = format!("https://api.github.com/users/{user_name}/gists", user_name = resp.get("login").unwrap().as_str().unwrap());
+    let gists: serde_json::Value = clients.get(gist_url.as_str())
+                                        .header("Authorization", format!("token {token}", token = rc))
+                                        .send().unwrap().json().unwrap();
+    println!("{:#?}", gists);
 }
